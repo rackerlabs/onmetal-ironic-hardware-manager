@@ -570,7 +570,11 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
         self.hardware._get_smartctl_attributes.return_value = (
                 SMARTCTL_ATTRIBUTES)
 
-        self.hardware.get_disk_metrics()
+        # get_disk_metrics is forced to take 2 additional arguments for node
+        # and ports by IPA
+        node = mock.Mock()
+        ports = mock.Mock()
+        self.hardware.get_disk_metrics(node, ports)
 
         self.hardware._send_gauges.assert_has_calls([
             mock.call('smartdata_sdb_32GMLCSATADOM', {

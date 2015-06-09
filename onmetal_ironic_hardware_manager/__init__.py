@@ -75,6 +75,9 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         :return: a default list of decommission steps, as a list of
         dictionaries
         """
+        # NOTE(supermari0): GenericHardwareManager is assumed to have an
+        # erase_devices step. We implement erase_block_device which is called
+        # by erase_devices. We need to be aware of that if IPA changes.
         return [
             {
                 'step': 'remove_bootloader',
@@ -355,7 +358,7 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         for name, gauge in six.iteritems(metrics_to_send):
             logger.gauge(name, gauge)
 
-    def get_disk_metrics(self):
+    def get_disk_metrics(self, node, ports):
         smart_data_columns = ['VALUE', 'WORST', 'RAW_VALUE']
         block_devices = self.list_block_devices()
         for block_device in block_devices:
