@@ -267,7 +267,7 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
     def _get_smartctl_attributes(self, block_device):
         smartout = utils.execute('smartctl', '--attributes', block_device.name)
         header = None
-        it = iter(smartout.split('\n'))
+        it = iter(smartout[0].split('\n'))
         for line in it:
             # note(JayF): skip forward until we get to the header and pull
             # it out
@@ -296,7 +296,7 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         attrkey = None
         # note(JayF): What we really get here is SMART data for the 4 SSDs
         # behind the Warpdrive card. Split them up to parse separately.
-        for idx, lines in enumerate(result.split('SSD Drive SMART')):
+        for idx, lines in enumerate(result[0].split('SSD Drive SMART')):
             # note(JayF): The first entry is headers, throw it away
             if idx == 0:
                 continue
