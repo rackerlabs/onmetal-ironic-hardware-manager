@@ -1,1 +1,2 @@
+pbr>=0.11,<1.0
 -e git+https://github.com/rackerlabs/ironic-python-agent.git@teeth-latest#egg=ironic_python_agent

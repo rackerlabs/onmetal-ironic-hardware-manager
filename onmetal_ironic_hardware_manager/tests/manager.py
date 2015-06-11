@@ -526,7 +526,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
     def test__get_smartctl_attributes(self, mocked_execute):
         expected = SMARTCTL_ATTRIBUTES
 
-        mocked_execute.return_value = SMARTCTL_ATTRIBUTES_OUT
+        mocked_execute.return_value = (SMARTCTL_ATTRIBUTES_OUT, '')
         self.block_device = hardware.BlockDevice('/dev/sda', '32G MLC SATADOM',
                                                  31016853504, False)
         actual = self.hardware._get_smartctl_attributes(self.block_device)
@@ -545,7 +545,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
         self.hardware._get_warpdrive_card = mock.Mock()
         self.hardware._get_warpdrive_card.return_value = {'id': '1'}
 
-        mocked_execute.return_value = DDOEMCLI_HEALTH_OUT
+        mocked_execute.return_value = (DDOEMCLI_HEALTH_OUT, '')
         actual = self.hardware._get_warpdrive_attributes(self.block_device)
 
         mocked_execute.assert_called_once_with(
