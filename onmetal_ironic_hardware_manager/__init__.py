@@ -26,8 +26,6 @@ from ironic_python_agent import utils
 from oslo_log import log
 
 
-# Directory that all BIOS utilities are located in
-BIOS_DIR = '/mnt/bios/quanta_A14'
 LSI_MODEL = 'NWD-BLP4-1600'
 SATADOM_MODEL = '32G MLC SATADOM'
 # Directory that all the LSI utilities/firmware are located in
@@ -86,18 +84,6 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
                 'reboot_requested': False,
             },
             {
-                'step': 'upgrade_bios',
-                'interface': 'deploy',
-                'priority': 90,
-                'reboot_requested': True,
-            },
-            {
-                'step': 'decom_bios_settings',
-                'interface': 'deploy',
-                'priority': 80,
-                'reboot_requested': True,
-            },
-            {
                 'step': 'update_warpdrive_firmware',
                 'interface': 'deploy',
                 'priority': 70,
@@ -123,12 +109,6 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
                 'reboot_requested': False
             },
             {
-                'step': 'customer_bios_settings',
-                'interface': 'deploy',
-                'priority': 30,
-                'reboot_requested': True,
-            },
-            {
                 'step': 'verify_ports',
                 'interface': 'deploy',
                 'priority': 20,
@@ -142,22 +122,6 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
             }
         ]
 
-    @metrics.instrument(__name__, 'decom_bios_settings')
-    def decom_bios_settings(self, node, ports):
-        driver_info = node.get('driver_info', {})
-        LOG.info('Decom BIOS Settings called with %s' % driver_info)
-        cmd = os.path.join(BIOS_DIR, 'write_bios_settings_decom.sh')
-        utils.execute(cmd, check_exit_code=[0])
-        return True
-
-    @metrics.instrument(__name__, 'customer_bios_settings')
-    def customer_bios_settings(self, node, ports):
-        driver_info = node.get('driver_info', {})
-        LOG.info('Customer BIOS Settings called with %s' % driver_info)
-        cmd = os.path.join(BIOS_DIR, 'write_bios_settings_customer.sh')
-        utils.execute(cmd, check_exit_code=[0])
-        return True
-
     @metrics.instrument(__name__, 'remove_bootloader')
     def remove_bootloader(self, node, ports):
         driver_info = node.get('driver_info', {})
@@ -165,14 +129,6 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         bootdisk = self.get_os_install_device()
         cmd = ['dd', 'if=/dev/zero', 'of=' + bootdisk, 'bs=1M', 'count=1']
         utils.execute(*cmd, check_exit_code=[0])
-        return True
-
-    @metrics.instrument(__name__, 'upgrade_bios')
-    def upgrade_bios(self, node, ports):
-        driver_info = node.get('driver_info', {})
-        LOG.info('Update BIOS called with %s' % driver_info)
-        cmd = os.path.join(BIOS_DIR, 'flash_bios.sh')
-        utils.execute(cmd, check_exit_code=[0])
         return True
 
     @metrics.instrument(__name__, 'update_warpdrive_firmware')
