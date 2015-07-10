@@ -28,8 +28,9 @@ from oslo_log import log
 
 # Directory that all BIOS utilities are located in
 BIOS_DIR = '/mnt/bios/quanta_A14'
-LSI_MODEL = 'NWD-BLP4-1600'
-SATADOM_MODEL = '32G MLC SATADOM'
+LSI_MODELS = ['NWD-BLP4-1600']
+SATADOM_MODELS = ['32G MLC SATADOM', '7 PIN  SATA FDM', 'Fastable SD131 7',
+                  'SATADOM-SH TYPE C 3SE']
 # Directory that all the LSI utilities/firmware are located in
 LSI_FIRMWARE_VERSION = '12.22.00.00'
 LSI_FIRMWARE_PREFLASH = 'NWD-BLP4-1600_ConcatSigned.fw'
@@ -212,8 +213,8 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
 
     def _list_lsi_devices(self):
         lines = utils.execute(DDOEMCLI, '-listall')[0].split('\n')
-        matching_devices = [line.split() for line in lines if LSI_MODEL
-                            in line]
+        matching_devices = [line.split() for line in lines for model in
+                            LSI_MODELS if model in line]
         devices = []
         for line in matching_devices:
             devices.append({
@@ -261,7 +262,7 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         return matching_devices[0]
 
     def _is_warpdrive(self, block_device):
-        if block_device.model == LSI_MODEL:
+        if block_device.model in LSI_MODELS:
             return True
 
     def _get_smartctl_attributes(self, block_device):
@@ -521,11 +522,11 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
             return 'onmetal-memory1'
         raise errors.CleaningError('unknown flavor')
 
-    def _verify_blockdevice_count(self, block_devices, model, count):
-        if len([d for d in block_devices if d.model == model]) != count:
+    def _verify_blockdevice_count(self, block_devices, models, count):
+        if len([d for d in block_devices if d.model in models]) != count:
             raise errors.CleaningError('Could not find %(count)s block '
                     'devices with model name "%(model)s"' %
-                    {'count': count, 'model': model})
+                    {'count': count, 'model': models})
 
     @metrics.instrument(__name__, 'verify_hardware')
     def verify_hardware(self, node, ports):
@@ -534,8 +535,8 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
 
         if flavor == 'onmetal-io1':
             # verify it has two IO cards
-            self._verify_blockdevice_count(block_devices, LSI_MODEL, 2)
+            self._verify_blockdevice_count(block_devices, LSI_MODELS, 2)
 
         # note(JayF): Until we verify more than disks, there's no
         # difference between memory and compute nodes.
-        self._verify_blockdevice_count(block_devices, SATADOM_MODEL, 1)
+        self._verify_blockdevice_count(block_devices, SATADOM_MODELS, 1)
