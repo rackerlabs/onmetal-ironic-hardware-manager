@@ -56,11 +56,12 @@ class OnMetalHardwareManager(hardware.GenericHardwareManager):
         return hardware.HardwareSupport.SERVICE_PROVIDER
 
     @metrics.instrument(__name__, 'erase_block_device')
-    def erase_block_device(self, block_device):
+    def erase_block_device(self, node, block_device):
         if self._erase_lsi_warpdrive(block_device):
             return
 
-        super(OnMetalHardwareManager, self).erase_block_device(block_device)
+        super(OnMetalHardwareManager, self).erase_block_device(
+            node, block_device)
 
     def get_clean_steps(self, node, ports):
         """Get a list of clean steps with priority.

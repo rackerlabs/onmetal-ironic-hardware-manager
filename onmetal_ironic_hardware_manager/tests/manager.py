@@ -363,7 +363,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
 
         mocked_execute.return_value = (DDOEMCLI_FORMAT_OUT, '')
 
-        self.hardware.erase_block_device(self.block_device)
+        self.hardware.erase_block_device({}, self.block_device)
 
         mocked_execute.assert_called_once_with(
                 onmetal_hardware_manager.DDOEMCLI,
@@ -386,7 +386,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
         # actually erasing an existing block device.
         self.assertRaises(errors.CleaningError,
                           self.hardware.erase_block_device,
-                          self.block_device)
+                          {}, self.block_device)
 
         self.assertEqual(0, mocked_execute.call_count)
 
@@ -408,7 +408,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
         # actually erasing an existing block device.
         self.assertRaises(errors.CleaningError,
                           self.hardware.erase_block_device,
-                          self.block_device)
+                          {}, self.block_device)
 
         self.assertEqual(0, mocked_execute.call_count)
 
@@ -431,7 +431,7 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
         mocked_execute.return_value = (error_output, '')
         self.assertRaises(errors.BlockDeviceEraseError,
                           self.hardware.erase_block_device,
-                          self.block_device)
+                          {}, self.block_device)
 
         mocked_execute.assert_called_once_with(
             onmetal_hardware_manager.DDOEMCLI,
@@ -445,10 +445,10 @@ class TestOnMetalHardwareManager(test_base.BaseTestCase):
                                                  mocked_generic):
 
         self.block_device.model = 'NormalSSD'
-        self.hardware.erase_block_device(self.block_device)
+        self.hardware.erase_block_device({}, self.block_device)
 
         self.assertEqual(0, mocked_execute.call_count)
-        mocked_generic.assert_called_once_with(self.block_device)
+        mocked_generic.assert_called_once_with({}, self.block_device)
 
     @mock.patch.object(utils, 'execute')
     def test_update_warpdrive_firmware_upgrade_both(self, mocked_execute):
